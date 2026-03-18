@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link, LogIn, User, Key } from 'lucide-react';
 
-// ⚠️ 開發者請注意：如果您要讓所有人使用自己的帳號登入，仍必須提供一組專案的 Client ID 讓程式能啟動 Google 登入畫面
-const GOOGLE_CLIENT_ID = "1009203193736-on0vm9pqtbh16lo8pn0dsmpn9ahjrpgs.apps.googleusercontent.com";
 
 export default function App() {
-  const [accessToken, setAccessToken] = useState(sessionStorage.getItem('googleAccessToken') || '');
-  
   const [gasUrlQa, setGasUrlQa] = useState('');
   const [gasUrlGame, setGasUrlGame] = useState('');
   const [showSettings, setShowSettings] = useState(false);
@@ -16,7 +12,6 @@ export default function App() {
   const [imageFile, setImageFile] = useState(null);
   const [imageBase64, setImageBase64] = useState('');
   const fileInputRef = useRef(null);
-  const clientRef = useRef(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,8 +50,6 @@ export default function App() {
     fetchCounts();
   }, [gasUrlQa, gasUrlGame]);
 
-  // Token Client 現改為在點擊按鈕時動態初始化，避免載入順序問題
-
   const fetchCounts = () => {
     if (gasUrlQa) {
       fetch(gasUrlQa)
@@ -76,28 +69,6 @@ export default function App() {
     localStorage.setItem('gasUrlQa', gasUrlQa);
     localStorage.setItem('gasUrlGame', gasUrlGame);
     setShowSettings(false);
-  };
-
-  const handleGoogleLogin = () => {
-    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("請替換為")) {
-      alert("系統提示：開發者尚未在此程式碼中填入 Google Client ID！\n請先修改 App.jsx 第 5 行的 GOOGLE_CLIENT_ID。");
-      return;
-    }
-    if (window.google) {
-      const client = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/generative-language.peruserquota',
-        callback: (response) => {
-          if (response.access_token) {
-            setAccessToken(response.access_token);
-            sessionStorage.setItem('googleAccessToken', response.access_token);
-          }
-        },
-      });
-      client.requestAccessToken();
-    } else {
-      alert("Google 登入服務尚未載入，請重新整理網頁後再試！");
-    }
   };
 
   const handleImageUpload = (e) => {
@@ -141,7 +112,6 @@ export default function App() {
 
   const processWithAI = async () => {
     if (!inputText && !imageBase64) { alert('請輸入文字或上傳截圖'); return; }
-    if (!accessToken) { alert('請先點擊右上角登入 Google 帳號授權 AI 分析！'); return; }
 
     setIsProcessing(true);
     setSaveStatus(null);
@@ -179,15 +149,12 @@ export default function App() {
         parts.push({ inlineData: { mimeType: mimeType, data: base64Data } });
       }
 
-      const headers = { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      };
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+      // 使用我們剛建立的 Cloudflare Pages Function 中轉站 (相對路徑即可)
+      const url = `/proxy`; 
 
       const response = await fetch(url, {
         method: 'POST',
-        headers: headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: parts }],
           generationConfig: { responseMimeType: "application/json", responseSchema: responseSchema }
@@ -258,12 +225,6 @@ export default function App() {
             <p className="text-slate-500 text-sm mt-1">上傳截圖或貼上文字，AI 自動解析並歸檔至 Google Sheet</p>
           </div>
           <div className="flex items-center gap-3">
-             <button 
-               onClick={handleGoogleLogin}
-               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all border ${accessToken ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-white text-indigo-600 border-indigo-200 hover:bg-indigo-50 shadow-sm'}`}
-             >
-               {accessToken ? <><User className="w-4 h-4" /> 已登入 (切換帳號)</> : <><LogIn className="w-4 h-4" /> 登入 Google 授權</>}
-             </button>
             <button 
               onClick={() => setShowSettings(!showSettings)}
               className={`p-2.5 text-slate-400 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200`}
