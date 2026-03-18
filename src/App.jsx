@@ -305,7 +305,7 @@ export default function App() {
                 <textarea 
                   value={inputText} onChange={(e) => setInputText(e.target.value)} onPaste={handlePaste}
                   placeholder="在此貼上文字，或 Ctrl+V 貼上截圖..."
-                  className={`w-full min-h-[10rem] px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 ${theme.ring.replace('ring-', 'ring-')}/10 focus:border-${theme.text.split('-')[1]}-400 resize-none transition-all placeholder:text-slate-400`}
+                  className={`w-full min-h-[10rem] px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 ${theme.ring.replace('ring-', 'ring-')}/10 focus:border-${theme.text.split('-')[1]}-400 resize-y transition-all placeholder:text-slate-400`}
                 />
               </div>
 
@@ -362,7 +362,7 @@ export default function App() {
                       <label className="text-sm font-bold text-slate-600 ml-1">問題 (Question)</label>
                       <textarea 
                         value={extractedQA.question} onChange={(e) => setExtractedQA({...extractedQA, question: e.target.value})}
-                        className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none transition-all`}
+                        className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none resize-y transition-all`}
                         rows="2"
                       />
                     </div>
@@ -370,7 +370,7 @@ export default function App() {
                       <label className="text-sm font-bold text-slate-600 ml-1">答案 (Answer)</label>
                       <textarea 
                         value={extractedQA.answer} onChange={(e) => setExtractedQA({...extractedQA, answer: e.target.value})}
-                        className={`w-full min-h-[12rem] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none resize-none transition-all`}
+                        className={`w-full min-h-[12rem] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none resize-y transition-all`}
                       />
                     </div>
                     <div className="space-y-2">
