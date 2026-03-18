@@ -55,20 +55,7 @@ export default function App() {
     fetchCounts();
   }, [gasUrlQa, gasUrlGame]);
 
-  useEffect(() => {
-    if (GOOGLE_CLIENT_ID && window.google) {
-      clientRef.current = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/generative-language.peruserquota',
-        callback: (response) => {
-          if (response.access_token) {
-            setAccessToken(response.access_token);
-            sessionStorage.setItem('googleAccessToken', response.access_token);
-          }
-        },
-      });
-    }
-  }, []);
+  // Token Client 現改為在點擊按鈕時動態初始化，避免載入順序問題
 
   const fetchCounts = () => {
     if (gasUrlQa) {
@@ -96,8 +83,20 @@ export default function App() {
       alert("系統提示：開發者尚未在此程式碼中填入 Google Client ID！\n請先修改 App.jsx 第 5 行的 GOOGLE_CLIENT_ID。");
       return;
     }
-    if (clientRef.current) {
-      clientRef.current.requestAccessToken();
+    if (window.google) {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/generative-language.peruserquota',
+        callback: (response) => {
+          if (response.access_token) {
+            setAccessToken(response.access_token);
+            sessionStorage.setItem('googleAccessToken', response.access_token);
+          }
+        },
+      });
+      client.requestAccessToken();
+    } else {
+      alert("Google 登入服務尚未載入，請重新整理網頁後再試！");
     }
   };
 
