@@ -24,7 +24,7 @@ export async function onRequest(context) {
       throw new Error("Cloudflare 專案尚未設定 GEMINI_API_KEY 環境變數！");
     }
 
-    const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
     // 4. 轉發請求給 Google Gemini
     const response = await fetch(targetUrl, {
