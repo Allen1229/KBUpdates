@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link, LogIn, User, Key } from 'lucide-react';
-
+import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link } from 'lucide-react';
 
 export default function App() {
   const [gasUrlQa, setGasUrlQa] = useState('');
   const [gasUrlGame, setGasUrlGame] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   
-  const [activeTab, setActiveTab] = useState('qa'); // 'qa' 或 'game'
+  const [activeTab, setActiveTab] = useState('qa');
   const [inputText, setInputText] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imageBase64, setImageBase64] = useState('');
@@ -27,16 +26,6 @@ export default function App() {
   });
 
   const [hasExtracted, setHasExtracted] = useState(false);
-
-  const theme = activeTab === 'qa' ? {
-    text: 'text-indigo-600', textLight: 'text-indigo-500', bg: 'bg-indigo-600',
-    bgHover: 'hover:bg-indigo-700', bgLightHover: 'hover:bg-indigo-50', borderHover: 'hover:border-indigo-400',
-    ring: 'focus:ring-indigo-500', disabledBg: 'disabled:bg-indigo-400'
-  } : {
-    text: 'text-amber-600', textLight: 'text-amber-500', bg: 'bg-amber-600',
-    bgHover: 'hover:bg-amber-700', bgLightHover: 'hover:bg-amber-50', borderHover: 'hover:border-amber-400',
-    ring: 'focus:ring-amber-500', disabledBg: 'disabled:bg-amber-400'
-  };
 
   useEffect(() => {
     const savedUrlQa = localStorage.getItem('gasUrlQa');
@@ -149,8 +138,7 @@ export default function App() {
         parts.push({ inlineData: { mimeType: mimeType, data: base64Data } });
       }
 
-      // 使用我們剛建立的 Cloudflare Pages Function 中轉站 (相對路徑即可)
-      const url = `/proxy`; 
+      const url = `/proxy`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -213,262 +201,272 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800 transition-colors duration-300">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <div>
-            <h1 className={`text-2xl font-bold flex items-center gap-2 ${theme.text} transition-colors duration-300`}>
-              <Database className="w-6 h-6" /> 金銀島知識庫更新小幫手
-            </h1>
-            <p className="text-slate-500 text-sm mt-1">上傳截圖或貼上文字，AI 自動解析並歸檔至 Google Sheet</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setShowSettings(!showSettings)}
-              className={`p-2.5 text-slate-400 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-200`}
-            >
-              <Settings className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+    <>
+      {/* 背景效果 */}
+      <div className="stars-bg"></div>
+      <div className="grid-overlay"></div>
 
-        {/* Settings */}
+      {/* 導覽列 */}
+      <header className="glass-header">
+        <div>
+          <span className="logo-text">ALN-<span className="accent">X</span></span>
+        </div>
+        <div className="header-actions">
+          <button className="btn-icon" onClick={() => setShowSettings(!showSettings)}>
+            <Settings size={20} />
+          </button>
+        </div>
+      </header>
+
+      <main className="app-container">
+        {/* 頁面標題 */}
+        <section className="page-hero">
+          <h1>KB 知識庫更新小幫手</h1>
+          <p>上傳截圖或貼上文字，AI 自動解析並歸檔至 Google Sheet</p>
+        </section>
+
+        {/* 設定面板 */}
         {showSettings && (
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 animate-fade-in space-y-8 relative overflow-hidden">
-            <div className={`absolute top-0 left-0 w-full h-1 ${theme.bg}`}></div>
-            
-            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-700 mb-6">
-              <Database className="w-6 h-6 text-emerald-500" /> Google Sheet 資料庫設定
+          <div className="settings-panel">
+            <h2>
+              <Database size={18} style={{ color: 'var(--accent-primary)' }} />
+              GOOGLE SHEET 資料庫設定
             </h2>
-            
-            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-5">
+            <div className="settings-group space-y-md">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. 「問題總攬」 API URL</label>
-                <input 
+                <label className="field-label">1. 「問題總攬」 API URL</label>
+                <input
                   type="text" value={gasUrlQa} onChange={(e) => setGasUrlQa(e.target.value)}
                   placeholder="貼上 Web App URL..."
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-shadow"
+                  className="field-input"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. 「遊戲資訊」 API URL</label>
-                <input 
+                <label className="field-label">2. 「遊戲資訊」 API URL</label>
+                <input
                   type="text" value={gasUrlGame} onChange={(e) => setGasUrlGame(e.target.value)}
                   placeholder="貼上 Web App URL..."
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow"
+                  className="field-input"
                 />
               </div>
             </div>
-
-            <button 
-              onClick={handleSaveSettings}
-              className={`w-full py-4 ${theme.bg} text-white rounded-xl ${theme.bgHover} transition-all font-bold shadow-lg shadow-indigo-100 uppercase tracking-widest text-sm`}
-            >
+            <button onClick={handleSaveSettings} className="btn-settings-save">
               儲存並套用設定
             </button>
           </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl w-fit border border-slate-200/50">
+        {/* 分類 Tabs */}
+        <div className="tab-bar">
           <button
             onClick={() => handleTabChange('qa')}
-            className={`flex items-center gap-2 px-8 py-3 rounded-xl font-bold transition-all ${
-              activeTab === 'qa' ? 'bg-white text-indigo-600 shadow-md ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`tab-btn ${activeTab === 'qa' ? 'active-qa' : ''}`}
           >
-            <MessageSquare className="w-5 h-5" /> 問題總攬 {qaCount !== null ? `(${qaCount})` : ''}
+            <MessageSquare size={18} />
+            問題總攬
+            {qaCount !== null && <span className="tab-count">({qaCount})</span>}
           </button>
           <button
             onClick={() => handleTabChange('game')}
-            className={`flex items-center gap-2 px-8 py-3 rounded-xl font-bold transition-all ${
-              activeTab === 'game' ? 'bg-white text-amber-600 shadow-md ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'
-            }`}
+            className={`tab-btn ${activeTab === 'game' ? 'active-game' : ''}`}
           >
-            <Gamepad2 className="w-5 h-5" /> 遊戲資訊 {gameCount !== null ? `(${gameCount})` : ''}
+            <Gamepad2 size={18} />
+            遊戲資訊
+            {gameCount !== null && <span className="tab-count">({gameCount})</span>}
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          
-          {/* Input Panel */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6 sticky top-6">
-            <h2 className="text-xl font-bold flex items-center gap-2 pb-4 border-b">
-              <Upload className={`w-6 h-6 ${theme.textLight}`} /> 1. 提供資料來源
+        {/* 兩欄主體 */}
+        <div className="two-col">
+          {/* 左側：輸入面板 */}
+          <div className="glass-panel">
+            <h2 className="panel-title">
+              <Upload size={18} className="icon" />
+              <span className="step-num">STEP 1</span>
+              提供資料來源
             </h2>
-            
-            <div className="space-y-6">
+
+            <div className="input-section space-y-lg">
               <div>
-                <label className="block text-sm font-bold text-slate-600 mb-3 ml-1">貼上對話或遊戲文字</label>
-                <textarea 
-                  value={inputText} onChange={(e) => setInputText(e.target.value)} onPaste={handlePaste}
+                <label>貼上對話或遊戲文字</label>
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onPaste={handlePaste}
                   placeholder="在此貼上文字，或 Ctrl+V 貼上截圖..."
-                  className={`w-full min-h-[10rem] px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 ${theme.ring.replace('ring-', 'ring-')}/10 focus:border-${theme.text.split('-')[1]}-400 resize-none transition-all placeholder:text-slate-400`}
+                  className="text-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-600 mb-3 ml-1 flex justify-between items-center">
-                  或上傳截圖
-                  {imageBase64 && <span className="text-emerald-500 flex items-center gap-1 text-xs font-medium"><Check className="w-3.5 h-3.5" /> 已載入</span>}
-                </label>
-                <div className="relative group">
-                  <label className={`flex flex-col items-center justify-center w-full h-40 border-2 border-slate-200 border-dashed rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-${theme.text.split('-')[1]}-300 transition-all overflow-hidden`}>
+                <div className="upload-label-row">
+                  <label style={{ marginBottom: 0 }}>或上傳截圖</label>
+                  {imageBase64 && (
+                    <span className="upload-loaded">
+                      <Check size={14} /> 已載入
+                    </span>
+                  )}
+                </div>
+                <div style={{ position: 'relative', marginTop: '8px' }}>
+                  <label className="upload-area">
                     {imageBase64 ? (
-                      <img src={imageBase64} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={imageBase64} alt="Preview" />
                     ) : (
-                      <div className="flex flex-col items-center justify-center text-slate-400">
-                        <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
-                        <p className="text-sm font-medium">點擊或拖曳圖片</p>
+                      <div className="upload-placeholder">
+                        <ImageIcon />
+                        <p>點擊或拖曳圖片</p>
                       </div>
                     )}
-                    <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} />
                   </label>
                   {imageBase64 && (
-                    <button 
+                    <button
                       onClick={(e) => { e.preventDefault(); clearInput(); }}
-                      className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition-colors"
+                      className="btn-delete-image"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 size={16} />
                     </button>
                   )}
                 </div>
               </div>
-            </div>
 
-            <button 
-              onClick={processWithAI}
-              disabled={isProcessing || (!inputText && !imageBase64)}
-              className={`w-full py-4 ${theme.bg} text-white rounded-2xl ${theme.bgHover} transition-all font-bold flex items-center justify-center gap-3 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none shadow-lg shadow-indigo-100`}
-            >
-              {isProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : <FileText className="w-6 h-6" />}
-              {isProcessing ? 'AI 分析中...' : '開始萃取資訊'}
-            </button>
+              <button
+                onClick={processWithAI}
+                disabled={isProcessing || (!inputText && !imageBase64)}
+                className="btn-primary"
+              >
+                {isProcessing ? <Loader2 size={20} className="animate-spin" /> : <FileText size={20} />}
+                {isProcessing ? 'AI 分析中...' : '開始萃取資訊'}
+              </button>
+            </div>
           </div>
 
-          {/* Result Panel */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col min-h-[600px]">
-            <h2 className="text-xl font-bold flex items-center gap-2 pb-4 border-b mb-6">
-              <Check className={`w-6 h-6 ${theme.textLight}`} /> 2. 確認與修改
+          {/* 右側：結果面板 */}
+          <div className="glass-panel result-panel">
+            <h2 className="panel-title">
+              <Check size={18} className="icon" />
+              <span className="step-num">STEP 2</span>
+              確認與修改
             </h2>
-            
+
             {hasExtracted ? (
-              <div className="space-y-5 flex-1 flex flex-col">
+              <div className="result-fields">
                 {activeTab === 'qa' ? (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-600 ml-1">問題 (Question)</label>
-                      <textarea 
-                        value={extractedQA.question} onChange={(e) => setExtractedQA({...extractedQA, question: e.target.value})}
-                        className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none transition-all`}
+                  <div className="space-y-md">
+                    <div className="result-field">
+                      <label>問題 (QUESTION)</label>
+                      <textarea
+                        value={extractedQA.question}
+                        onChange={(e) => setExtractedQA({...extractedQA, question: e.target.value})}
+                        className="result-input"
                         rows="2"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-600 ml-1">答案 (Answer)</label>
-                      <textarea 
-                        value={extractedQA.answer} onChange={(e) => setExtractedQA({...extractedQA, answer: e.target.value})}
-                        className={`w-full min-h-[12rem] px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none resize-none transition-all`}
+                    <div className="result-field">
+                      <label>答案 (ANSWER)</label>
+                      <textarea
+                        value={extractedQA.answer}
+                        onChange={(e) => setExtractedQA({...extractedQA, answer: e.target.value})}
+                        className="result-input answer-field"
                       />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-600 ml-1">來源 (Source)</label>
-                        <input 
-                          type="text" value={extractedQA.source} onChange={(e) => setExtractedQA({...extractedQA, source: e.target.value})}
-                          className={`w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 ${theme.ring} outline-none transition-all`}
-                        />
+                    <div className="result-field">
+                      <label>來源 (SOURCE)</label>
+                      <input
+                        type="text"
+                        value={extractedQA.source}
+                        onChange={(e) => setExtractedQA({...extractedQA, source: e.target.value})}
+                        className="result-input"
+                      />
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">遊戲ID</label>
-                      <input type="text" value={extractedGame.gameId} onChange={(e) => setExtractedGame({...extractedGame, gameId: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                  <div className="game-fields-grid">
+                    <div className="result-field">
+                      <label>遊戲 ID</label>
+                      <input type="text" value={extractedGame.gameId} onChange={(e) => setExtractedGame({...extractedGame, gameId: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">英文縮寫</label>
-                      <input type="text" value={extractedGame.abbreviation} onChange={(e) => setExtractedGame({...extractedGame, abbreviation: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>英文縮寫</label>
+                      <input type="text" value={extractedGame.abbreviation} onChange={(e) => setExtractedGame({...extractedGame, abbreviation: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">遊戲名稱 (繁體)</label>
-                      <input type="text" value={extractedGame.nameTw} onChange={(e) => setExtractedGame({...extractedGame, nameTw: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field full-width">
+                      <label>遊戲名稱 (繁體)</label>
+                      <input type="text" value={extractedGame.nameTw} onChange={(e) => setExtractedGame({...extractedGame, nameTw: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">名稱 (簡體)</label>
-                      <input type="text" value={extractedGame.nameCn} onChange={(e) => setExtractedGame({...extractedGame, nameCn: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>名稱 (簡體)</label>
+                      <input type="text" value={extractedGame.nameCn} onChange={(e) => setExtractedGame({...extractedGame, nameCn: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">名稱 (英文)</label>
-                      <input type="text" value={extractedGame.nameEn} onChange={(e) => setExtractedGame({...extractedGame, nameEn: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>名稱 (英文)</label>
+                      <input type="text" value={extractedGame.nameEn} onChange={(e) => setExtractedGame({...extractedGame, nameEn: e.target.value})} className="result-input" />
                     </div>
-                    
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">歷程文字</label>
-                      <input type="text" value={extractedGame.historyText} onChange={(e) => setExtractedGame({...extractedGame, historyText: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>歷程文字</label>
+                      <input type="text" value={extractedGame.historyText} onChange={(e) => setExtractedGame({...extractedGame, historyText: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">歷程網址 <Link className="w-2.5 h-2.5" /></label>
-                      <input type="text" value={extractedGame.historyUrl} onChange={(e) => setExtractedGame({...extractedGame, historyUrl: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>歷程網址 <Link size={10} className="link-icon" /></label>
+                      <input type="text" value={extractedGame.historyUrl} onChange={(e) => setExtractedGame({...extractedGame, historyUrl: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">說明文字</label>
-                      <input type="text" value={extractedGame.manualText} onChange={(e) => setExtractedGame({...extractedGame, manualText: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>說明文字</label>
+                      <input type="text" value={extractedGame.manualText} onChange={(e) => setExtractedGame({...extractedGame, manualText: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-1 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">說明網址 <Link className="w-2.5 h-2.5" /></label>
-                      <input type="text" value={extractedGame.manualUrl} onChange={(e) => setExtractedGame({...extractedGame, manualUrl: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field">
+                      <label>說明網址 <Link size={10} className="link-icon" /></label>
+                      <input type="text" value={extractedGame.manualUrl} onChange={(e) => setExtractedGame({...extractedGame, manualUrl: e.target.value})} className="result-input" />
                     </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">備註</label>
-                      <input type="text" value={extractedGame.notes} onChange={(e) => setExtractedGame({...extractedGame, notes: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 ring-amber-500 outline-none" />
+                    <div className="result-field full-width">
+                      <label>備註</label>
+                      <input type="text" value={extractedGame.notes} onChange={(e) => setExtractedGame({...extractedGame, notes: e.target.value})} className="result-input" />
                     </div>
                   </div>
                 )}
 
-                <div className="pt-6 mt-auto space-y-4">
-                  <div className="flex gap-4">
-                    <button 
-                      onClick={clearInput} disabled={isSaving}
-                      className="px-6 py-4 bg-slate-100 text-slate-500 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all font-bold disabled:opacity-50"
-                    >
-                      <Trash2 className="w-6 h-6" />
-                    </button>
-                    <button 
-                      onClick={saveToGoogleSheet} disabled={isSaving}
-                      className={`flex-1 py-4 ${theme.bg} text-white rounded-2xl ${theme.bgHover} transition-all font-bold flex items-center justify-center gap-3 shadow-lg ${theme.disabledBg}`}
-                    >
-                      {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
-                      累積至「{activeTab === 'qa' ? '問題總攬' : '遊戲資訊'}」
-                    </button>
-                  </div>
-
-                  {saveStatus === 'success' && (
-                     <div className={`p-4 ${theme.bgLightHover} ${theme.text} rounded-2xl border border-${theme.text.split('-')[1]}-100 flex items-center justify-center gap-2 font-bold animate-fade-in`}>
-                       <Check className="w-5 h-5"/> 寫入成功！
-                     </div>
-                  )}
-                  {saveStatus === 'error' && (
-                     <div className="p-4 bg-red-50 text-red-500 rounded-2xl border border-red-100 flex items-center justify-center gap-2 font-bold animate-fade-in">
-                       儲存失敗，請檢查網路或 GAS 設定。
-                     </div>
-                  )}
+                <div className="action-row">
+                  <button onClick={clearInput} disabled={isSaving} className="btn-clear">
+                    <Trash2 size={20} />
+                  </button>
+                  <button
+                    onClick={saveToGoogleSheet}
+                    disabled={isSaving}
+                    className="btn-primary btn-save"
+                  >
+                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                    累積至「{activeTab === 'qa' ? '問題總攬' : '遊戲資訊'}」
+                  </button>
                 </div>
+
+                {saveStatus === 'success' && (
+                  <div className="status-msg success">
+                    <Check size={18} /> 寫入成功！
+                  </div>
+                )}
+                {saveStatus === 'error' && (
+                  <div className="status-msg error">
+                    儲存失敗，請檢查網路或 GAS 設定。
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                  <FileText className="w-12 h-12 opacity-30" />
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <FileText />
                 </div>
-                <p className="font-bold text-lg text-slate-400">等待 AI 分析結果</p>
-                <p className="text-sm mt-1 text-slate-400">請在左側提供資料並開始萃取</p>
+                <p className="empty-title">等待 AI 分析結果</p>
+                <p className="empty-sub">請在左側提供資料並開始萃取</p>
               </div>
             )}
           </div>
-
         </div>
-      </div>
-    </div>
+      </main>
+
+      {/* 頁尾 */}
+      <footer className="glass-footer">
+        <p>&copy; 2026 ALN-X Ecosystem. Powered by Advanced Agentic Coding.</p>
+      </footer>
+    </>
   );
 }
