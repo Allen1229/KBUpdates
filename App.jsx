@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link, LogIn, User, Key } from 'lucide-react';
 
+// ⚠️ 開發者請注意：如果您要讓所有人使用自己的帳號登入，仍必須提供一組專案的 Client ID 讓程式能啟動 Google 登入畫面
+const GOOGLE_CLIENT_ID = "1009203193736-on0vm9pqtbh16lo8pn0dsmpn9ahjrpgs.apps.googleusercontent.com";
+
 export default function App() {
-  const [apiKey, setApiKey] = useState(localStorage.getItem('geminiApiKey') || '');
-  const [clientId, setClientId] = useState(localStorage.getItem('googleClientId') || '');
   const [accessToken, setAccessToken] = useState(sessionStorage.getItem('googleAccessToken') || '');
   
   const [gasUrlQa, setGasUrlQa] = useState('');
@@ -47,17 +48,17 @@ export default function App() {
     const savedUrlGame = localStorage.getItem('gasUrlGame');
     if (savedUrlQa) setGasUrlQa(savedUrlQa);
     if (savedUrlGame) setGasUrlGame(savedUrlGame);
-    if (!savedUrlQa || !savedUrlGame || (!apiKey && !clientId)) setShowSettings(true);
-  }, [apiKey, clientId]);
+    if (!savedUrlQa || !savedUrlGame) setShowSettings(true);
+  }, []);
 
   useEffect(() => {
     fetchCounts();
   }, [gasUrlQa, gasUrlGame]);
 
   useEffect(() => {
-    if (clientId && window.google) {
+    if (GOOGLE_CLIENT_ID && window.google) {
       clientRef.current = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
+        client_id: GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/generative-language',
         callback: (response) => {
           if (response.access_token) {
@@ -67,7 +68,7 @@ export default function App() {
         },
       });
     }
-  }, [clientId]);
+  }, []);
 
   const fetchCounts = () => {
     if (gasUrlQa) {
@@ -87,14 +88,12 @@ export default function App() {
   const handleSaveSettings = () => {
     localStorage.setItem('gasUrlQa', gasUrlQa);
     localStorage.setItem('gasUrlGame', gasUrlGame);
-    localStorage.setItem('geminiApiKey', apiKey);
-    localStorage.setItem('googleClientId', clientId);
     setShowSettings(false);
   };
 
   const handleGoogleLogin = () => {
-    if (!clientId) {
-      alert("請先設定 Google Client ID");
+    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("請替換為")) {
+      alert("系統提示：開發者尚未在此程式碼中填入 Google Client ID！\n請先修改 App.jsx 第 5 行的 GOOGLE_CLIENT_ID。");
       return;
     }
     if (clientRef.current) {
@@ -143,7 +142,7 @@ export default function App() {
 
   const processWithAI = async () => {
     if (!inputText && !imageBase64) { alert('請輸入文字或上傳截圖'); return; }
-    if (!apiKey && !accessToken) { alert('請先設定 API Key 或登入 Google 帳號'); setShowSettings(true); return; }
+    if (!accessToken) { alert('請先點擊右上角登入 Google 帳號授權 AI 分析！'); return; }
 
     setIsProcessing(true);
     setSaveStatus(null);
@@ -181,14 +180,11 @@ export default function App() {
         parts.push({ inlineData: { mimeType: mimeType, data: base64Data } });
       }
 
-      const headers = { 'Content-Type': 'application/json' };
-      let baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
-      let url = `${baseUrl}?key=${apiKey}`;
-      
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-        url = baseUrl;
-      }
+      const headers = { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      };
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -284,58 +280,25 @@ export default function App() {
             <div className={`absolute top-0 left-0 w-full h-1 ${theme.bg}`}></div>
             
             <h2 className="text-lg font-bold flex items-center gap-2 text-slate-700 mb-6">
-              <Settings className="w-6 h-6 text-slate-400" /> 系統與資料庫設定
+              <Database className="w-6 h-6 text-emerald-500" /> Google Sheet 資料庫設定
             </h2>
             
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* GAS Section */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold flex items-center gap-2 text-slate-600">
-                  <Database className="w-4 h-4 text-emerald-500" /> Google Sheet 目標設定
-                </h3>
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-5">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. 「問題總攬」 API URL</label>
-                    <input 
-                      type="text" value={gasUrlQa} onChange={(e) => setGasUrlQa(e.target.value)}
-                      placeholder="貼上 Web App URL..."
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-shadow"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. 「遊戲資訊」 API URL</label>
-                    <input 
-                      type="text" value={gasUrlGame} onChange={(e) => setGasUrlGame(e.target.value)}
-                      placeholder="貼上 Web App URL..."
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow"
-                    />
-                  </div>
-                </div>
+            <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. 「問題總攬」 API URL</label>
+                <input 
+                  type="text" value={gasUrlQa} onChange={(e) => setGasUrlQa(e.target.value)}
+                  placeholder="貼上 Web App URL..."
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-shadow"
+                />
               </div>
-
-              {/* API/Auth Keys Section */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold flex items-center gap-2 text-slate-600">
-                  <Key className="w-4 h-4 text-indigo-500" /> AI 服務金鑰設定
-                </h3>
-                <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-5">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Google Client ID (用於Google登入)</label>
-                    <input 
-                      type="text" value={clientId} onChange={(e) => setClientId(e.target.value)}
-                      placeholder="YOUR_CLIENT_ID.apps.googleusercontent.com"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gemini API Key (備用方案)</label>
-                    <input 
-                      type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="若不使用帳號登入，可直接貼上 API Key..."
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. 「遊戲資訊」 API URL</label>
+                <input 
+                  type="text" value={gasUrlGame} onChange={(e) => setGasUrlGame(e.target.value)}
+                  placeholder="貼上 Web App URL..."
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none transition-shadow"
+                />
               </div>
             </div>
 
