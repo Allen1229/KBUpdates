@@ -59,7 +59,7 @@ export default function App() {
     if (GOOGLE_CLIENT_ID && window.google) {
       clientRef.current = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/generative-language',
+        scope: 'https://www.googleapis.com/auth/generative-language.peruserquota',
         callback: (response) => {
           if (response.access_token) {
             setAccessToken(response.access_token);
