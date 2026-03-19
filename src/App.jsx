@@ -142,9 +142,14 @@ export default function App() {
       } else {
         promptText = `請分析提取遊戲資訊：gameId, nameTw, nameCn, nameEn, abbreviation, historyText, historyUrl, manualText, manualUrl, notes。
 規則：
-1. 缺少的中文名稱請進行繁簡互換，英文請由中文翻譯補上。
-2. 「歷程文字(historyText)」與「說明文字(manualText)」是數值欄位，請判斷內容中的關鍵字（如：歷程、說明頁）後面的數值，並只填入對應的數值。
-3. 如果未提供網址，但有提取出歷程或說明的數值，請直接針對「歷程網址(historyUrl)」與「說明網址(manualUrl)」填入此格式: https://webcase.towergame.com/View.aspx?no=[數值]`;
+1. 語系翻譯：請務必根據欄位語系顯示。
+   - 如果只有提供繁體資訊，簡體欄位請自行翻譯成簡體。
+   - 如果只有提供簡體資訊，繁體欄位請自行翻譯成繁體。
+   - 若只有提供英文名稱，則繁體與簡體欄位也請同步使用該英文名稱填入。
+2. 數值提取：
+   - 「歷程文字(historyText)」與「說明文字(manualText)」為數值欄位。請判斷關鍵字（如：歷程、說明頁）後面的數值並帶入。
+3. 網址生成：
+   - 如果未提供網址但有提取出數值，請自動套用格式：https://webcase.towergame.com/View.aspx?no=[數值]`;
         responseSchema = {
           type: "OBJECT",
           properties: {
@@ -213,10 +218,12 @@ export default function App() {
       });
       const result = await response.json();
       if (result.status === 'success') {
-        setSaveStatus('success');
+        if (result.duplicate) setSaveStatus('duplicate');
+        else setSaveStatus('success');
+        
         if (activeTab === 'qa') setQaCount(prev => prev !== null ? prev + 1 : 1);
         if (activeTab === 'game') setGameCount(prev => prev !== null ? prev + 1 : 1);
-        setTimeout(() => clearInput(), 2000);
+        setTimeout(() => clearInput(), result.duplicate ? 4000 : 2000);
       } else throw new Error(result.message);
     } catch (error) {
       console.error("儲存失敗:", error);
@@ -473,6 +480,11 @@ export default function App() {
                 {saveStatus === 'success' && (
                   <div className="status-msg success">
                     <Check size={18} /> 寫入成功！
+                  </div>
+                )}
+                {saveStatus === 'duplicate' && (
+                  <div className="status-msg warning">
+                    <Check size={18} /> 寫入成功！(⚠️ 偵測到重複遊戲 ID)
                   </div>
                 )}
                 {saveStatus === 'error' && (

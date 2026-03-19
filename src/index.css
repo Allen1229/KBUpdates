@@ -749,6 +749,13 @@ textarea.result-input.answer-field {
   color: var(--accent-primary);
 }
 
+.status-msg.warning {
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
 .status-msg.error {
   background: rgba(255, 68, 68, 0.08);
   border: 1px solid rgba(255, 68, 68, 0.2);
