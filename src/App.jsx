@@ -26,6 +26,7 @@ export default function App() {
   });
 
   const [hasExtracted, setHasExtracted] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     const savedUrlQa = localStorage.getItem('gasUrlQa');
@@ -62,7 +63,28 @@ export default function App() {
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (file) handleFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
+  const handleFile = (file) => {
+    if (file && file.type.startsWith('image/')) {
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setImageBase64(reader.result);
@@ -208,9 +230,9 @@ export default function App() {
 
       {/* 導覽列 */}
       <header className="glass-header">
-        <div>
+        <a href="https://alnx-dashboard.pages.dev/" className="logo-link">
           <span className="logo-text">ALN-<span className="accent">X</span></span>
-        </div>
+        </a>
         <div className="header-actions">
           <button className="btn-icon" onClick={() => setShowSettings(!showSettings)}>
             <Settings size={20} />
@@ -308,7 +330,12 @@ export default function App() {
                   )}
                 </div>
                 <div style={{ position: 'relative', marginTop: '8px' }}>
-                  <label className="upload-area">
+                  <label 
+                    className={`upload-area ${isDragOver ? 'dragging' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
                     {imageBase64 ? (
                       <img src={imageBase64} alt="Preview" />
                     ) : (
