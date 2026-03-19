@@ -401,6 +401,29 @@ body {
   letter-spacing: 1px;
 }
 
+/* ── 遊戲分類的紫色主題 (STEP1 & 2) ── */
+.theme-game .panel-title .icon {
+  color: var(--tab-game);
+}
+.theme-game .panel-title .step-num {
+  color: var(--tab-game);
+  background: rgba(240, 147, 251, 0.12);
+  border-color: rgba(240, 147, 251, 0.3);
+}
+
+.theme-game .btn-primary {
+  background: linear-gradient(135deg, var(--tab-game), #d658e4);
+}
+.theme-game .btn-primary:hover {
+  box-shadow: 0 0 25px rgba(240, 147, 251, 0.4);
+}
+.theme-game .btn-primary.btn-save {
+  background: linear-gradient(135deg, var(--tab-game), #c445d4);
+}
+.theme-game .btn-primary.btn-save:hover {
+  box-shadow: 0 0 25px rgba(240, 147, 251, 0.4);
+}
+
 /* ── 輸入區塊 ── */
 .input-section label {
   display: block;
