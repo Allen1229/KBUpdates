@@ -140,7 +140,11 @@ export default function App() {
           required: ["question", "answer", "source"]
         };
       } else {
-        promptText = `請分析提取遊戲資訊：gameId, nameTw, nameCn, nameEn, abbreviation, historyText, historyUrl, manualText, manualUrl, notes。規則：缺少的中文名稱請進行繁簡互換，英文請由中文翻譯補上。`;
+        promptText = `請分析提取遊戲資訊：gameId, nameTw, nameCn, nameEn, abbreviation, historyText, historyUrl, manualText, manualUrl, notes。
+規則：
+1. 缺少的中文名稱請進行繁簡互換，英文請由中文翻譯補上。
+2. 「歷程文字(historyText)」與「說明文字(manualText)」是數值欄位，請判斷內容中的關鍵字（如：歷程、說明頁）後面的數值，並只填入對應的數值。
+3. 如果未提供網址，但有提取出歷程或說明的數值，請直接針對「歷程網址(historyUrl)」與「說明網址(manualUrl)」填入此格式: https://webcase.towergame.com/View.aspx?no=[數值]`;
         responseSchema = {
           type: "OBJECT",
           properties: {
@@ -299,7 +303,7 @@ export default function App() {
         </div>
 
         {/* 兩欄主體 */}
-        <div className="two-col">
+        <div className={`two-col ${activeTab === 'game' ? 'theme-game' : ''}`}>
           {/* 左側：輸入面板 */}
           <div className="glass-panel">
             <h2 className="panel-title">
