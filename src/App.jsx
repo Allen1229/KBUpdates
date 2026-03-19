@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link } from 'lucide-react';
+import { Upload, FileText, Send, Settings, Check, Loader2, Image as ImageIcon, Trash2, Database, MessageSquare, Gamepad2, Link, X } from 'lucide-react';
 
 export default function App() {
   const [gasUrlQa, setGasUrlQa] = useState('');
@@ -218,12 +218,15 @@ export default function App() {
       });
       const result = await response.json();
       if (result.status === 'success') {
-        if (result.duplicate) setSaveStatus('duplicate');
-        else setSaveStatus('success');
+        if (result.duplicate) {
+          setSaveStatus('duplicate');
+        } else {
+          setSaveStatus('success');
+          setTimeout(() => clearInput(), 2000);
+        }
         
         if (activeTab === 'qa') setQaCount(prev => prev !== null ? prev + 1 : 1);
         if (activeTab === 'game') setGameCount(prev => prev !== null ? prev + 1 : 1);
-        setTimeout(() => clearInput(), result.duplicate ? 4000 : 2000);
       } else throw new Error(result.message);
     } catch (error) {
       console.error("儲存失敗:", error);
@@ -485,6 +488,9 @@ export default function App() {
                 {saveStatus === 'duplicate' && (
                   <div className="status-msg warning">
                     <Check size={18} /> 寫入成功！(⚠️ 偵測到重複遊戲 ID)
+                    <button className="btn-close-msg" onClick={() => clearInput()} title="手動清除畫面">
+                      <X size={16} />
+                    </button>
                   </div>
                 )}
                 {saveStatus === 'error' && (

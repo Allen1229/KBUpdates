@@ -754,6 +754,30 @@ textarea.result-input.answer-field {
   border: 1px solid rgba(255, 215, 0, 0.3);
   color: #ffd700;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+  position: relative;
+  padding-right: 40px;
+}
+
+.btn-close-msg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #ffd700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.btn-close-msg:hover {
+  background: rgba(255, 215, 0, 0.15);
+  color: #fff;
 }
 
 .status-msg.error {
