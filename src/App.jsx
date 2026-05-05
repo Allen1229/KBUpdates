@@ -166,28 +166,34 @@ export default function App() {
     setSaveStatus(null);
 
     try {
-      // 遊戲資訊模式：檢查是否為單一網址輸入
-      if (activeTab === 'game' && inputText && !imageBase64) {
-        const singleUrl = parseSingleUrl(inputText);
-        if (singleUrl) {
-          // 單一網址：歷程和說明頁都填入相同資訊
-          const urlFields = {
-            historyText: singleUrl.noParam,
-            historyUrl: singleUrl.url,
-            manualText: singleUrl.noParam,
-            manualUrl: singleUrl.url,
-          };
-          setExtractedGame(prev => ({ ...prev, ...urlFields }));
-          setHasExtracted(true);
-          setIsProcessing(false);
-          return;
-        }
-
+      // 遊戲資訊模式：檢查輸入文字中是否包含網址
+      let urlPreFilled = false;
+      if (activeTab === 'game' && inputText) {
         // 檢查是否有分別指定歷程/說明頁網址
         const multiUrls = parseMultipleUrls(inputText);
         if (multiUrls) {
           setExtractedGame(prev => ({ ...prev, ...multiUrls }));
-          // 不 return，繼續讓 AI 處理其他欄位，但在 prompt 中告知已有 URL 資訊
+          urlPreFilled = true;
+        } else {
+          // 檢查是否為單一網址
+          const singleUrl = parseSingleUrl(inputText);
+          if (singleUrl) {
+            const urlFields = {
+              historyText: singleUrl.noParam,
+              historyUrl: singleUrl.url,
+              manualText: singleUrl.noParam,
+              manualUrl: singleUrl.url,
+            };
+            setExtractedGame(prev => ({ ...prev, ...urlFields }));
+            urlPreFilled = true;
+
+            // 如果沒有圖片，只有純網址，直接完成不需呼叫 AI
+            if (!imageBase64) {
+              setHasExtracted(true);
+              setIsProcessing(false);
+              return;
+            }
+          }
         }
       }
 
@@ -213,7 +219,8 @@ export default function App() {
    - 「歷程文字(historyText)」與「說明文字(manualText)」為數值欄位。請判斷關鍵字（如：歷程、說明頁）後面的數值並帶入。
 3. 網址生成：
    - 如果未提供網址但有提取出數值，請自動套用格式：https://webcase.towergame.com/View.aspx?no=[數值]
-4. 若使用者有分別指定「歷程」和「說明頁」的網址，請分別填入對應欄位。`;
+4. 若使用者有分別指定「歷程」和「說明頁」的網址，請分別填入對應欄位。
+5. 重要：若使用者只提供了一個網址（沒有分別指定歷程或說明頁），則 historyText、historyUrl、manualText、manualUrl 都要使用同一個網址的資訊。`;
         responseSchema = {
           type: "OBJECT",
           properties: {
@@ -248,7 +255,16 @@ export default function App() {
       if (result.candidates && result.candidates[0].content.parts[0].text) {
         const jsonResponse = JSON.parse(result.candidates[0].content.parts[0].text);
         if (activeTab === 'qa') setExtractedQA(jsonResponse);
-        else setExtractedGame(prev => ({ ...prev, ...jsonResponse }));
+        else {
+          // 如果已經預填了 URL 欄位，保留預填值不被 AI 覆蓋
+          if (urlPreFilled) {
+            delete jsonResponse.historyText;
+            delete jsonResponse.historyUrl;
+            delete jsonResponse.manualText;
+            delete jsonResponse.manualUrl;
+          }
+          setExtractedGame(prev => ({ ...prev, ...jsonResponse }));
+        }
         setHasExtracted(true);
       } else {
         throw new Error(result.error?.message || "無法解析回傳結果");
